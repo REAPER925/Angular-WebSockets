@@ -6,6 +6,9 @@ const express = require('express'),
 let timerId = null,
     sockets = new Set();
 
+const myServerPort = 8080;
+
+
 //This example emits to individual sockets (track by sockets Set above).
 //Could also add sockets to a "room" as well using socket.join('roomId')
 //https://socket.io/docs/server-api/#socket-join-room-callback
@@ -33,6 +36,36 @@ io.on('connection', socket => {
 
 });
 
+
+
+let apiKey = "fc5825d4f088f2e678be68f88f80abbe7fdf404396303fff67842c1edbea438f";
+const WebSocket = require('ws');
+const ccStreamer = new WebSocket('wss://streamer.cryptocompare.com/v2?api_key=' + apiKey);
+
+ccStreamer.on('open', function open() {
+    var subRequest = {
+        "action": "SubAdd",
+        "subs": ["2~Coinbase~BTC~USD"]
+    };
+    ccStreamer.send(JSON.stringify(subRequest));
+
+});
+
+ccStreamer.on('message', function incoming(myData) {
+    console.log(myData);
+    //server.emit("msgToServer", "hello");
+    //server.emit("msgToClient", "hello");
+    //server.emit("msgToServer", myData);
+   
+    //s.emit("chat", myData);
+
+    for (const s of sockets) {
+      console.log(`Emitting value: ${myData}`);
+      s.emit('data', { data: myData });
+    }
+   
+});
+
 function startTimer() {
   //Simulate stock data received by the server that needs 
   //to be pushed to clients
@@ -54,5 +87,7 @@ function startTimer() {
   }, 2000);
 }
 
-server.listen(8080);
-console.log('Visit http://localhost:8080 in your browser');
+server.listen(myServerPort);
+
+console.log('Visit http://localhost:'+ myServerPort + ' in your browser');
+console.log('NESTJS RUNNING ON: http://localhost:'+ myServerPort);

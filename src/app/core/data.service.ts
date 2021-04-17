@@ -6,6 +6,19 @@ import * as socketIo from 'socket.io-client';
 
 import { Socket } from '../shared/interfaces';
 
+// the port of the DataService can be any port
+
+// The app.component.html instantiates an instance of data.service to get the price feed
+
+// the price feed is sourced from 
+
+const socketPort: number = 5208;
+
+// Note: internal server runs on 8080
+
+// Nest server runs on 5208
+
+
 declare var io : {
   connect(url: string): Socket;
 };
@@ -17,7 +30,7 @@ export class DataService {
   observer: Observer<number>;
 
   getQuotes() : Observable<number> {
-    this.socket = socketIo('http://localhost:8080');
+    this.socket = socketIo('http://localhost:' + socketPort );
 
     this.socket.on('data', (res) => {
       this.observer.next(res.data);
